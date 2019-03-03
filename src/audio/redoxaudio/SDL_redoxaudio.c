@@ -31,7 +31,7 @@
 #define _THIS SDL_AudioDevice *this
 
 // The tag name used by REDOX audio
-#define REDOXAUDIO_DRIVER_NAME "redox"
+#define REDOXAUDIO_DRIVER_NAME "redoxaudio"
 
 /* SDL callbacks
 void (*DetectDevices) (void);
@@ -105,15 +105,18 @@ static void REDOXAUDIO_CloseDevice(_THIS)
 
 static int REDOXAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int iscapture)
 {
+	SDL_PrivateAudioData *audio_data = NULL;
+
 	fprintf(stderr, "WARNING: You are using the SDL redox audio driver!\n");
 
 	// Open the audio device
-	this->hidden = (SDL_PrivateAudioData *)SDL_calloc(1, sizeof(SDL_PrivateAudioData));
-	if (this->hidden == NULL)
+	audio_data = (SDL_PrivateAudioData *)SDL_calloc(1, sizeof(SDL_PrivateAudioData));
+	if (audio_data == NULL)
 	{
 		return SDL_OutOfMemory();
 	}
 
+	this->hidden = audio_data;
 	this->hidden->output = open("audio:", O_WRONLY);
 	if (this->hidden->output < 0)
 	{
