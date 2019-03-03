@@ -33,34 +33,19 @@
 // The tag name used by REDOX audio
 #define REDOXAUDIO_DRIVER_NAME "redoxaudio"
 
-/* SDL callbacks
-void (*DetectDevices) (void);
-int (*OpenDevice) (_THIS, void *handle, const char *devname, int iscapture);
-void (*ThreadInit) (_THIS); // Called by audio thread at start
-void (*ThreadDeinit) (_THIS); // Called by audio thread at end
-void (*BeginLoopIteration)(_THIS);  // Called by audio thread at top of loop
-void (*WaitDevice) (_THIS);
-void (*PlayDevice) (_THIS);
-int (*GetPendingBytes) (_THIS);
-Uint8 *(*GetDeviceBuf) (_THIS);
-int (*CaptureFromDevice) (_THIS, void *buffer, int buflen);
-void (*FlushCapture) (_THIS);
-void (*PrepareToClose) (_THIS);  //< Called between run and draining wait for playback devices
-void (*CloseDevice) (_THIS);
-void (*LockDevice) (_THIS);
-void (*UnlockDevice) (_THIS);
-void (*FreeDeviceHandle) (void *handle);  //< SDL is done with handle from SDL_AddDeviceDevice()
-void (*Deinitialize) (void);
-*/
-
 // Device driver functions
+static void REDOXAUDIO_DetectDevices(void);
 static int REDOXAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int iscapture);
 static void REDOXAUDIO_WaitDevice(_THIS);
 static void REDOXAUDIO_PlayDevice(_THIS);
 static Uint8 *REDOXAUDIO_GetDeviceBuf(_THIS);
 static void REDOXAUDIO_CloseDevice(_THIS);
-static void REDOXAUDIO_FreeDeviceHandle(void *handle);
 static int REDOXAUDIO_Init(SDL_AudioDriverImpl *impl);
+
+static void
+REDOXAUDIO_DetectDevices(void)
+{
+}
 
 // This function waits until it is possible to write a full sound buffer
 static void REDOXAUDIO_WaitDevice(_THIS)
@@ -69,13 +54,15 @@ static void REDOXAUDIO_WaitDevice(_THIS)
 
 static void REDOXAUDIO_PlayDevice(_THIS)
 {
-	int written = write(this->hidden->output,
-						this->hidden->mixbuf,
-						this->hidden->mixlen);
+	Uint32 written = write(this->hidden->output,
+						   this->hidden->mixbuf,
+						   this->hidden->mixlen);
 
+	//fprintf(stderr, "Redox audio wrinting %d to audio buffer %p with size %d\n", written, this->hidden->mixbuf, this->hidden->mixlen);
 	// If we couldn't write, assume fatal error for now
-	if ((Uint32)written != this->hidden->mixlen)
+	if (written != this->hidden->mixlen)
 	{
+		fprintf(stderr, "Error: written bytes != mixlen (%d != %d)\n", written, this->hidden->mixlen);
 		this->enabled.value = 0;
 	}
 
@@ -101,6 +88,9 @@ static void REDOXAUDIO_CloseDevice(_THIS)
 		close(this->hidden->output);
 		this->hidden->output = -1;
 	}
+
+	SDL_free(this->hidden);
+	this->hidden = NULL;
 }
 
 static int REDOXAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int iscapture)
@@ -110,57 +100,62 @@ static int REDOXAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int i
 	fprintf(stderr, "WARNING: You are using the SDL redox audio driver!\n");
 
 	// Open the audio device
-	audio_data = (SDL_PrivateAudioData *)SDL_calloc(1, sizeof(SDL_PrivateAudioData));
+	audio_data = (SDL_PrivateAudioData *)SDL_malloc(sizeof(SDL_PrivateAudioData));
 	if (audio_data == NULL)
 	{
 		return SDL_OutOfMemory();
 	}
+	SDL_memset(audio_data, 0, sizeof(SDL_PrivateAudioData));
 
 	this->hidden = audio_data;
 	this->hidden->output = open("audio:", O_WRONLY);
 	if (this->hidden->output < 0)
 	{
-		fprintf(stderr, "Redox audio failed to open audio:");
+		fprintf(stderr, "Redox audio failed to open audio\n");
 		return -1;
 	}
+
+	//fprintf(stderr, "Redox audio descriptor opened %d\n", this->hidden->output);
 
 	// Override sdl settings
 	this->spec.freq = 44100;
 	this->spec.format = AUDIO_S16;
 	this->spec.channels = 2;
 	SDL_CalculateAudioSpec(&this->spec);
+	//fprintf(stderr, "Redox audio spec calculated\n");
 
 	// Allocate mixing buffer
 	this->hidden->mixlen = this->spec.size;
 	this->hidden->mixbuf = (Uint8 *)SDL_malloc(this->hidden->mixlen);
 	if (this->hidden->mixbuf == NULL)
 	{
-		fprintf(stderr, "Redox audio failed to allocate audio memory");
+		fprintf(stderr, "Redox audio failed to allocate audio memory\n");
 		return -1;
 	}
 	SDL_memset(this->hidden->mixbuf, this->spec.silence, this->spec.size);
 
-	fprintf(stderr, "Redox audio opened successfully\n");
+	//fprintf(stderr, "Redox audio opened successfully\n");
 
 	// We're ready to rock and roll. :-)
 	return 0;
 }
 
-static void REDOXAUDIO_FreeDeviceHandle(void *handle)
-{
-	//SDL_free(device->hidden);
-	SDL_free(handle);
-}
-
 static int REDOXAUDIO_Init(SDL_AudioDriverImpl *impl)
 {
+	//fprintf(stderr, "SDL redox audio init started\n");
+
 	/* Set the function pointers */
+	impl->DetectDevices = REDOXAUDIO_DetectDevices;
 	impl->OpenDevice = REDOXAUDIO_OpenDevice;
 	impl->WaitDevice = REDOXAUDIO_WaitDevice;
 	impl->PlayDevice = REDOXAUDIO_PlayDevice;
 	impl->GetDeviceBuf = REDOXAUDIO_GetDeviceBuf;
 	impl->CloseDevice = REDOXAUDIO_CloseDevice;
-	impl->FreeDeviceHandle = REDOXAUDIO_FreeDeviceHandle;
+
+	impl->HasCaptureSupport = SDL_FALSE;
+	impl->AllowsArbitraryDeviceNames = 0;
+
+	//fprintf(stderr, "SDL redox audio init finished\n");
 
 	return 1;
 }
