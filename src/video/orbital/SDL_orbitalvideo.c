@@ -146,7 +146,7 @@ static SDL_VideoDevice* ORBITAL_CreateDevice(int devindex)
 
 	device->free = ORBITAL_DeleteDevice;
 
-	device->num_displays = 1;
+	device->num_displays = 0;
 
     fprintf(stderr, "SDL orbital device created successfully\n");
 
@@ -161,20 +161,17 @@ VideoBootStrap ORBITAL_bootstrap = {
 
 int ORBITAL_VideoInit(_THIS)
 {
-	SDL_VideoDisplay display;
-    SDL_DisplayMode current_mode;
+	SDL_DisplayMode desktop_mode;
 
 	fprintf(stderr, "WARNING: You are using the SDL orbital video driver!\n");
 
 	ORBITAL_InitOSKeymap();
 
-	SDL_zero(display);
-	SDL_zero(current_mode);
+	SDL_zero(desktop_mode);
+	desktop_mode.w = orb_display_width();
+	desktop_mode.h = orb_display_height();
 
-    display.desktop_mode = current_mode;
-    display.current_mode = current_mode;
-
-	SDL_AddVideoDisplay(&display);
+	SDL_AddBasicVideoDisplay(&desktop_mode);
 
 	fprintf(stderr, "Video display initialized successfully\n");
 
