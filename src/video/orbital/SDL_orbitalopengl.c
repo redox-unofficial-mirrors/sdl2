@@ -45,6 +45,9 @@ int ORBITAL_GL_SwapWindow(_THIS, SDL_Window* window) {
     Uint32* frame_data = orb_window_data(video_data->orb_window);
     Uint32* image_data = video_data->orb_buffer;
 
+    // It is currently required to flush for video data to be updated
+    glFlush();
+
     for(int i = 0; i < width * height; ++i) {
         frame_data[i] = image_data[i] | 0xFF000000;
     }
@@ -62,9 +65,9 @@ int ORBITAL_GL_MakeCurrent(_THIS, SDL_Window* window, SDL_GLContext ctx) {
 
     if (ctx == NULL)
         return -1;
-    
+
     assert(video_data != NULL);
-    
+
     width = orb_window_width(video_data->orb_window);
     height = orb_window_height(video_data->orb_window);
     buffer = malloc(width * height * 4);
@@ -74,7 +77,7 @@ int ORBITAL_GL_MakeCurrent(_THIS, SDL_Window* window, SDL_GLContext ctx) {
         SDL_OutOfMemory();
         return -1;
     }
-    
+
     //fprintf(stderr, "Frame buffer allocated\n");
 
     if (!OSMesaMakeCurrent(context, buffer, GL_UNSIGNED_BYTE, width, height)) {
@@ -83,7 +86,7 @@ int ORBITAL_GL_MakeCurrent(_THIS, SDL_Window* window, SDL_GLContext ctx) {
         OSMesaDestroyContext(context);
         return -1;
     }
-    
+
     //fprintf(stderr, "OSMesaMakeCurrent done\n");
 
     OSMesaPixelStore(OSMESA_Y_UP, 0);
@@ -93,7 +96,7 @@ int ORBITAL_GL_MakeCurrent(_THIS, SDL_Window* window, SDL_GLContext ctx) {
     video_data->mesa_context = context;
 
     fprintf(stderr, "SDL orbital OSMesa buffer binded to context\n");
-    
+
     return 0;
 }
 
@@ -105,7 +108,7 @@ SDL_GLContext ORBITAL_GL_CreateContext(_THIS, SDL_Window* window) {
         fprintf(stderr, "OSMesaCreateContextExt failed\n");
         return NULL;
     }
-    
+
     fprintf(stderr, "SDL orbital OSMesa context created successfully\n");
 
     return ORBITAL_GL_MakeCurrent(_this, window, ctx) >= 0 ? ctx : NULL;
