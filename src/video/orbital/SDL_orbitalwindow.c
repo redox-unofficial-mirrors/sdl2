@@ -66,7 +66,7 @@ int ORBITAL_CreateWindow(_THIS, SDL_Window *window) {
         fprintf(stderr, "Setting window in background\n");
         orb_flags |= ORB_WINDOW_BACK;
     }*/
-    
+
     return init_window(window, video_data, orb_flags);
 }
 
@@ -76,9 +76,9 @@ int ORBITAL_CreateWindowFrom(_THIS, SDL_Window * window, const void *data) {
     Uint32 height = 0;
     Sint32 x = 0;
     Sint32 y = 0;
-    
+
     assert(video_data != NULL);
-    
+
     width = orb_window_width(video_data->orb_window);
     height = orb_window_height(video_data->orb_window);
     x = orb_window_x(video_data->orb_window);
@@ -155,7 +155,9 @@ int ORBITAL_GetWindowGammaRamp(_THIS, SDL_Window* window, Uint16* ramp) {
 }
 
 void ORBITAL_SetWindowGrab(_THIS, SDL_Window* window, SDL_bool grabbed) {
-    /* TODO: Implement this! */
+    SDL_VideoData *video_data = (SDL_VideoData *)_this->driverdata;
+    assert(video_data != NULL);
+    orb_window_set_mouse_grab(video_data->orb_window, grabbed == SDL_TRUE);
 }
 
 void ORBITAL_DestroyWindow(_THIS, SDL_Window* window) {
