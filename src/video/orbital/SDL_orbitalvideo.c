@@ -42,6 +42,7 @@
 #include "SDL_orbitalframebuffer.h"
 #include "SDL_orbitalopengl.h"
 
+#include <assert.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -72,17 +73,26 @@ static void ORBITAL_DeleteDevice(SDL_VideoDevice *device)
     if (video_data->orb_buffer != NULL) {
         SDL_free(video_data->orb_buffer);
     }
-	
+
     SDL_free(device->driverdata);
 	SDL_free(device);
 
     fprintf(stderr, "SDL orbital device disposed\n");
 }
 
+static int ORBITAL_SetRelativeMouseMode(SDL_bool enabled) {
+    SDL_VideoDevice *_this = SDL_GetVideoDevice();
+    SDL_VideoData *video_data = (SDL_VideoData *)_this->driverdata;
+    assert(video_data != NULL);
+    orb_window_set_mouse_relative(video_data->orb_window, enabled == SDL_TRUE);
+	return 0;
+}
+
 static SDL_VideoDevice* ORBITAL_CreateDevice(int devindex)
 {
 	SDL_VideoDevice* device = NULL;
     SDL_VideoData* video_data = NULL;
+	SDL_Mouse* mouse = NULL;
 
     //fprintf(stderr, "Creating video device\n");
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
@@ -147,6 +157,11 @@ static SDL_VideoDevice* ORBITAL_CreateDevice(int devindex)
 	device->free = ORBITAL_DeleteDevice;
 
 	device->num_displays = 0;
+
+	mouse = SDL_GetMouse();
+	if (mouse) {
+    	mouse->SetRelativeMouseMode = ORBITAL_SetRelativeMouseMode;
+	}
 
     fprintf(stderr, "SDL orbital device created successfully\n");
 

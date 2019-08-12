@@ -62,6 +62,9 @@ void ORBITAL_PumpEvents(_THIS)
             case OrbEventOption_Mouse:
                 SDL_SendMouseMotion(mouse->focus, mouse->mouseID, SDL_FALSE, oeo.mouse.x, oeo.mouse.y);
                 break;
+            case OrbEventOption_MouseRelative:
+                SDL_SendMouseMotion(mouse->focus, mouse->mouseID, SDL_TRUE, oeo.mouse_relative.dx, oeo.mouse_relative.dy);
+                break;
             case OrbEventOption_Button:
                 if (oeo.button.left ^ last_button_left)
                     SDL_SendMouseButton(mouse->focus, mouse->mouseID, oeo.button.left ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_LEFT);
