@@ -57,7 +57,6 @@ static const Uint8 GLES2_VertexSrc_Default_[] = " \
 ";
 
 static const Uint8 GLES2_FragmentSrc_SolidSrc_[] = " \
-    precision mediump float; \
     uniform vec4 u_color; \
     \
     void main() \
@@ -67,7 +66,6 @@ static const Uint8 GLES2_FragmentSrc_SolidSrc_[] = " \
 ";
 
 static const Uint8 GLES2_FragmentSrc_TextureABGRSrc_[] = " \
-    precision mediump float; \
     uniform sampler2D u_texture; \
     uniform vec4 u_modulation; \
     varying vec2 v_texCoord; \
@@ -81,7 +79,6 @@ static const Uint8 GLES2_FragmentSrc_TextureABGRSrc_[] = " \
 
 /* ARGB to ABGR conversion */
 static const Uint8 GLES2_FragmentSrc_TextureARGBSrc_[] = " \
-    precision mediump float; \
     uniform sampler2D u_texture; \
     uniform vec4 u_modulation; \
     varying vec2 v_texCoord; \
@@ -98,7 +95,6 @@ static const Uint8 GLES2_FragmentSrc_TextureARGBSrc_[] = " \
 
 /* RGB to ABGR conversion */
 static const Uint8 GLES2_FragmentSrc_TextureRGBSrc_[] = " \
-    precision mediump float; \
     uniform sampler2D u_texture; \
     uniform vec4 u_modulation; \
     varying vec2 v_texCoord; \
@@ -116,7 +112,6 @@ static const Uint8 GLES2_FragmentSrc_TextureRGBSrc_[] = " \
 
 /* BGR to ABGR conversion */
 static const Uint8 GLES2_FragmentSrc_TextureBGRSrc_[] = " \
-    precision mediump float; \
     uniform sampler2D u_texture; \
     uniform vec4 u_modulation; \
     varying vec2 v_texCoord; \
@@ -159,7 +154,6 @@ static const Uint8 GLES2_FragmentSrc_TextureBGRSrc_[] = " \
 
 
 #define YUV_SHADER_PROLOGUE                                     \
-"precision mediump float;\n"                                    \
 "uniform sampler2D u_texture;\n"                                \
 "uniform sampler2D u_texture_u;\n"                              \
 "uniform sampler2D u_texture_v;\n"                              \
@@ -171,8 +165,8 @@ static const Uint8 GLES2_FragmentSrc_TextureBGRSrc_[] = " \
 "\n"                                                            \
 "void main()\n"                                                 \
 "{\n"                                                           \
-"    mediump vec3 yuv;\n"                                       \
-"    lowp vec3 rgb;\n"                                          \
+"    vec3 yuv;\n"                                               \
+"    vec3 rgb;\n"                                               \
 "\n"                                                            \
 "    // Get the YUV values \n"                                  \
 "    yuv.x = texture2D(u_texture,   v_texCoord).r;\n"           \
@@ -192,8 +186,8 @@ static const Uint8 GLES2_FragmentSrc_TextureBGRSrc_[] = " \
 "\n"                                                            \
 "void main()\n"                                                 \
 "{\n"                                                           \
-"    mediump vec3 yuv;\n"                                       \
-"    lowp vec3 rgb;\n"                                          \
+"    vec3 yuv;\n"                                               \
+"    vec3 rgb;\n"                                               \
 "\n"                                                            \
 "    // Get the YUV values \n"                                  \
 "    yuv.x = texture2D(u_texture,   v_texCoord).r;\n"           \
@@ -212,8 +206,8 @@ static const Uint8 GLES2_FragmentSrc_TextureBGRSrc_[] = " \
 "\n"                                                            \
 "void main()\n"                                                 \
 "{\n"                                                           \
-"    mediump vec3 yuv;\n"                                       \
-"    lowp vec3 rgb;\n"                                          \
+"    vec3 yuv;\n"                                               \
+"    vec3 rgb;\n"                                               \
 "\n"                                                            \
 "    // Get the YUV values \n"                                  \
 "    yuv.x = texture2D(u_texture,   v_texCoord).r;\n"           \
@@ -282,7 +276,6 @@ static const Uint8 GLES2_FragmentSrc_TextureNV21BT709Src_[] = \
 /* Custom Android video format texture */
 static const Uint8 GLES2_FragmentSrc_TextureExternalOESSrc_[] = " \
     #extension GL_OES_EGL_image_external : require\n\
-    precision mediump float; \
     uniform samplerExternalOES u_texture; \
     uniform vec4 u_modulation; \
     varying vec2 v_texCoord; \
