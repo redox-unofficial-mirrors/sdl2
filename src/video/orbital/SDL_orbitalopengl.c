@@ -133,10 +133,3 @@ int ORBITAL_GL_GetSwapInterval(_THIS) {
 void ORBITAL_GL_UnloadLibrary(_THIS) {
     // TODO: Implement this, if necessary?
 }
-
-
-/* FIXME: This function is meant to clear the OpenGL context when the video
-   mode changes (see SDL_bmodes.cc), but it doesn't seem to help, and is not
-   currently in use. */
-void ORBITAL_GL_RebootContexts(_THIS) {
-}
