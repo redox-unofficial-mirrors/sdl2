@@ -69,9 +69,11 @@ static void ORBITAL_DeleteDevice(SDL_VideoDevice *device)
     }
     if (video_data->mesa_context != NULL) {
 	    ORBITAL_GL_DeleteContext(device, video_data->mesa_context);
+        video_data->mesa_context = NULL;
     }
     if (video_data->orb_buffer != NULL) {
         SDL_free(video_data->orb_buffer);
+        video_data->orb_buffer = NULL;
     }
 
     SDL_free(device->driverdata);

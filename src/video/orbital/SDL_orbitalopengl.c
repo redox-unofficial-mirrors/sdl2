@@ -82,8 +82,8 @@ int ORBITAL_GL_MakeCurrent(_THIS, SDL_Window* window, SDL_GLContext ctx) {
 
     if (!OSMesaMakeCurrent(context, buffer, GL_UNSIGNED_BYTE, width, height)) {
         fprintf(stderr, "OSMesaMakeCurrent failed\n");
-        SDL_free(buffer);
         OSMesaDestroyContext(context);
+        SDL_free(buffer);
         return -1;
     }
 
