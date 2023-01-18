@@ -23,6 +23,7 @@
 
 #include "../SDL_sysvideo.h"
 
+#include "SDL_orbitalopengl.h"
 #include "SDL_orbitalwindow.h"
 #include "SDL_orbitalvideo.h"
 #include <orbital.h>
@@ -41,6 +42,7 @@ int init_window(SDL_Window* window, SDL_VideoData* video_data, Uint32 flags) {
     fprintf(stderr, "Initializing orbital window at %d,%d with size %dx%d with flags %d\n", window->x, window->y, window->w, window->h, flags);
     orb_window = orb_window_new_flags(window->x, window->y, window->w, window->h, title, flags);
     if (orb_window != NULL) {
+        video_data->window = window;
         video_data->orb_window = orb_window;
         //fprintf(stderr, "Orbital window creation success\n");
     } else {
@@ -115,7 +117,11 @@ void ORBITAL_SetWindowPosition(_THIS, SDL_Window* window) {
 void ORBITAL_SetWindowSize(_THIS, SDL_Window * window) {
     SDL_VideoData *video_data = (SDL_VideoData *)_this->driverdata;
     assert(video_data != NULL);
+
+    // Set size of orbital window
     orb_window_set_size(video_data->orb_window, window->w, window->h);
+    // Set size of mesa context
+    ORBITAL_GL_SetSize(_this, window->w, window->h);
 }
 
 void ORBITAL_SetWindowBordered(_THIS, SDL_Window* window, SDL_bool bordered) {

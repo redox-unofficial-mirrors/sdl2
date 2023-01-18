@@ -35,8 +35,13 @@ extern "C"
 /* Private display data */
 
 typedef struct SDL_VideoData {
+    // SDL window
+    SDL_Window* window;
+    // Orbital window
     void* orb_window;
-    void* orb_buffer;
+    // Color buffer for mesa context
+    void* mesa_buffer;
+    // Mesa context
     OSMesaContext mesa_context;
 } SDL_VideoData;
 

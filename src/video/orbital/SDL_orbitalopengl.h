@@ -40,6 +40,8 @@ extern int ORBITAL_GL_SwapWindow(_THIS, SDL_Window *window);
 extern SDL_GLContext ORBITAL_GL_CreateContext(_THIS, SDL_Window *window);
 extern void ORBITAL_GL_DeleteContext(_THIS, SDL_GLContext context);
 
+extern void ORBITAL_GL_SetSize(_THIS, int width, int height);
+
 #ifdef __cplusplus
 }
 #endif

@@ -43,7 +43,7 @@ int ORBITAL_GL_SwapWindow(_THIS, SDL_Window* window) {
     Uint32 width = orb_window_width(video_data->orb_window);
     Uint32 height = orb_window_height(video_data->orb_window);
     Uint32* frame_data = orb_window_data(video_data->orb_window);
-    Uint32* image_data = video_data->orb_buffer;
+    Uint32* image_data = video_data->mesa_buffer;
 
     // It is currently required to flush for video data to be updated
     glFlush();
@@ -70,7 +70,7 @@ int ORBITAL_GL_MakeCurrent(_THIS, SDL_Window* window, SDL_GLContext ctx) {
 
     width = orb_window_width(video_data->orb_window);
     height = orb_window_height(video_data->orb_window);
-    buffer = malloc(width * height * 4);
+    buffer = SDL_malloc(width * height * 4);
     if (buffer == NULL) {
         fprintf(stderr, "Frame buffer allocation failed\n");
         OSMesaDestroyContext(context);
@@ -92,7 +92,7 @@ int ORBITAL_GL_MakeCurrent(_THIS, SDL_Window* window, SDL_GLContext ctx) {
     OSMesaPixelStore(OSMESA_Y_UP, 0);
     OSMesaColorClamp(GL_TRUE);
 
-    video_data->orb_buffer = buffer;
+    video_data->mesa_buffer = buffer;
     video_data->mesa_context = context;
 
     fprintf(stderr, "SDL orbital OSMesa buffer binded to context\n");
@@ -132,4 +132,39 @@ int ORBITAL_GL_GetSwapInterval(_THIS) {
 
 void ORBITAL_GL_UnloadLibrary(_THIS) {
     // TODO: Implement this, if necessary?
+}
+
+void ORBITAL_GL_SetSize(_THIS, int width, int height) {
+    void * buffer;
+    SDL_VideoData* video_data = _this->driverdata;
+    assert(video_data != NULL);
+
+    // Resize OSMesa context, if it exists
+    if (video_data->mesa_context == NULL) {
+        return;
+    }
+
+    fprintf(stderr, "ORBITAL_GL_SetSize: Resizing mesa context %p to %d, %d\n", video_data->mesa_context, width, height);
+
+    buffer = SDL_malloc(width * height * 4);
+    if (buffer == NULL) {
+        fprintf(stderr, "ORBITAL_GL_SetSize: Frame buffer allocation failed\n");
+        SDL_OutOfMemory();
+        return;
+    }
+
+    if (!OSMesaMakeCurrent(video_data->mesa_context, buffer, GL_UNSIGNED_BYTE, width, height)) {
+        fprintf(stderr, "ORBITAL_GL_SetSize: OSMesaMakeCurrent failed\n");
+        SDL_free(buffer);
+        return;
+    }
+
+    if (video_data->mesa_buffer != NULL) {
+        fprintf(stderr, "ORBITAL_GL_SetSize: Freeing previous mesa buffer %p\n", video_data->mesa_buffer);
+        SDL_free(video_data->mesa_buffer);
+        video_data->mesa_buffer = NULL;
+    }
+
+    video_data->mesa_buffer = buffer;
+    fprintf(stderr, "ORBITAL_GL_SetSize: Set new mesa buffer %p\n", video_data->mesa_buffer);
 }

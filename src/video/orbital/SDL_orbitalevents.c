@@ -28,9 +28,11 @@
 #include "../../events/SDL_events_c.h"
 
 #include <orbital.h>
+#include "SDL_orbitalopengl.h"
 #include "SDL_orbitalvideo.h"
 #include "SDL_orbitalevents.h"
 
+#include <assert.h>
 #include <unistd.h>
 
 /* Static variables so only changes are reported */
@@ -38,19 +40,20 @@ static bool last_button_left = false;
 static bool last_button_middle = false;
 static bool last_button_right = false;
 
-#define KEYMAP_SIZE 128
-
-static SDL_Keycode keymap[KEYMAP_SIZE];
+static SDL_Keycode keymap[256];
 
 void ORBITAL_PumpEvents(_THIS)
 {
     SDL_Keysym keysym;
+    void* event_iter;
+    OrbEventOption oeo;
     SDL_Mouse *mouse = SDL_GetMouse();
     SDL_VideoData* video_data = _this->driverdata;
+    assert(video_data != NULL);
 
-    void* event_iter = orb_window_events(video_data->orb_window);
-    OrbEventOption oeo = orb_events_next(event_iter);
+    event_iter = orb_window_events(video_data->orb_window);
 
+    oeo = orb_events_next(event_iter);
     while (oeo.tag != OrbEventOption_None) {
         switch (oeo.tag) {
             case OrbEventOption_Key:
@@ -87,10 +90,13 @@ void ORBITAL_PumpEvents(_THIS)
                 //SDL_PrivateAppActive(oeo.focus.focused, SDL_APPMOUSEFOCUS);
                 break;
             case OrbEventOption_Move:
-                // oeo.move.x, oeo.move.y
+                SDL_SendWindowEvent(video_data->window, SDL_WINDOWEVENT_MOVED, oeo.move.x, oeo.move.y);
                 break;
             case OrbEventOption_Resize:
-                //SDL_PrivateResize(oeo.resize.width, oeo.resize.height);
+                // Set size of mesa context
+                ORBITAL_GL_SetSize(_this, oeo.resize.width, oeo.resize.height);
+                // Send resize event
+                SDL_SendWindowEvent(video_data->window, SDL_WINDOWEVENT_RESIZED, oeo.resize.width, oeo.resize.height);
                 break;
             case OrbEventOption_Screen:
                 // oeo.screen.width, oeo.screen.height
