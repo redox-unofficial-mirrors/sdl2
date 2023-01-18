@@ -47,6 +47,7 @@ void ORBITAL_PumpEvents(_THIS)
     SDL_Keysym keysym;
     void* event_iter;
     OrbEventOption oeo;
+    int resize_width = -1, resize_height = -1;
     SDL_Mouse *mouse = SDL_GetMouse();
     SDL_VideoData* video_data = _this->driverdata;
     assert(video_data != NULL);
@@ -93,10 +94,9 @@ void ORBITAL_PumpEvents(_THIS)
                 SDL_SendWindowEvent(video_data->window, SDL_WINDOWEVENT_MOVED, oeo.move.x, oeo.move.y);
                 break;
             case OrbEventOption_Resize:
-                // Set size of mesa context
-                ORBITAL_GL_SetSize(_this, oeo.resize.width, oeo.resize.height);
-                // Send resize event
-                SDL_SendWindowEvent(video_data->window, SDL_WINDOWEVENT_RESIZED, oeo.resize.width, oeo.resize.height);
+                // Combine expensive resizes
+                resize_width = oeo.resize.width;
+                resize_height = oeo.resize.height;
                 break;
             case OrbEventOption_Screen:
                 // oeo.screen.width, oeo.screen.height
@@ -112,6 +112,14 @@ void ORBITAL_PumpEvents(_THIS)
     }
 
     orb_events_destroy(event_iter);
+
+    // Perform the latest resize
+    if (resize_width >= 0 && resize_height >= 0) {
+        // Set size of mesa context
+        ORBITAL_GL_SetSize(_this, resize_width, resize_height);
+        // Send resize event
+        SDL_SendWindowEvent(video_data->window, SDL_WINDOWEVENT_RESIZED, resize_width, resize_height);
+    }
 }
 
 void ORBITAL_InitOSKeymap()
