@@ -201,5 +201,5 @@ int ORBITAL_VideoInit(_THIS)
 */
 void ORBITAL_VideoQuit(_THIS)
 {
-	ORBITAL_DeleteDevice(_this);
+	fprintf(stderr, "orbital video driver quit\n");
 }
