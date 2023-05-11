@@ -272,6 +272,9 @@ SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 #if __NACL__ 
     /* FIXME: Setting thread priority does not seem to be supported in NACL */
     return 0;
+#elif defined(__redox__)
+    /* FIXME: Setting thread priority is not supported in Redox */
+    return 0;
 #elif __LINUX__
     int value;
     pid_t thread = syscall(SYS_gettid);
