@@ -63,6 +63,15 @@ void ORBITAL_PumpEvents(_THIS)
                 keysym.mod = KMOD_NONE;
                 SDL_SendKeyboardKey(oeo.key.pressed ? SDL_PRESSED : SDL_RELEASED, keysym.scancode);
                 break;
+            case OrbEventOption_TextInput:
+                if (oeo.text_input.character) {
+                    char text[4] = {0};
+                    mbstate_t state = { 0 };
+                    if (wcrtomb(text, oeo.text_input.character, &state) > 0) {
+                        SDL_SendKeyboardText(text);
+                    }
+                }
+                break;
             case OrbEventOption_Mouse:
                 SDL_SendMouseMotion(mouse->focus, mouse->mouseID, SDL_FALSE, oeo.mouse.x, oeo.mouse.y);
                 break;
