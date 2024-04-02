@@ -36,40 +36,37 @@ extern "C" {
 
 const char* DEFAULT_ORB_WINDOW_TITLE = "SDL Orbital window";
 
-int init_window(SDL_Window* window, SDL_VideoData* video_data, Uint32 flags) {
-    const char* title = window->title != NULL ? window->title : DEFAULT_ORB_WINDOW_TITLE;
-    void* orb_window = NULL;
-    fprintf(stderr, "Initializing orbital window at %d,%d with size %dx%d with flags %d\n", window->x, window->y, window->w, window->h, flags);
-    orb_window = orb_window_new_flags(window->x, window->y, window->w, window->h, title, flags);
-    if (orb_window != NULL) {
-        video_data->window = window;
-        video_data->orb_window = orb_window;
-        //fprintf(stderr, "Orbital window creation success\n");
-    } else {
-        fprintf(stderr, "Orbital window creation failed\n");
-    }
-
-    return video_data->orb_window != NULL ? 0 : -1;
-}
-
 int ORBITAL_CreateWindow(_THIS, SDL_Window *window) {
-    Uint32 orb_flags = ORB_WINDOW_ASYNC;
     SDL_VideoData *video_data = (SDL_VideoData *)_this->driverdata;
+    const char* title = window->title != NULL ? window->title : DEFAULT_ORB_WINDOW_TITLE;
+    Uint32 flags = ORB_WINDOW_ASYNC;
 
     if(window->flags & SDL_WINDOW_RESIZABLE) {
         fprintf(stderr, "Setting window resizable\n");
-        orb_flags |= ORB_WINDOW_RESIZABLE;
+        flags |= ORB_WINDOW_RESIZABLE;
     }
     /*if(window->flags & SDL_WINDOW_SHOWN) {
         fprintf(stderr, "Setting window in foreground\n");
-        orb_flags |= ORB_WINDOW_FRONT;
+        flags |= ORB_WINDOW_FRONT;
     }
     if(window->flags & SDL_WINDOW_HIDDEN) {
         fprintf(stderr, "Setting window in background\n");
-        orb_flags |= ORB_WINDOW_BACK;
+        flags |= ORB_WINDOW_BACK;
     }*/
 
-    return init_window(window, video_data, orb_flags);
+    fprintf(stderr, "Initializing orbital window at %d,%d with size %dx%d with flags %d\n", window->x, window->y, window->w, window->h, flags);
+    video_data->orb_window = orb_window_new_flags(window->x, window->y, window->w, window->h, title, flags);
+    if (video_data->orb_window == NULL) {
+        fprintf(stderr, "Orbital window creation failed\n");
+        return -1;
+    }
+    video_data->window = window;
+
+    // Always set focus
+    SDL_SetMouseFocus(window);
+    SDL_SetKeyboardFocus(window);
+
+    return 0;
 }
 
 int ORBITAL_CreateWindowFrom(_THIS, SDL_Window * window, const void *data) {
