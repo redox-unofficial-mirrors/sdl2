@@ -108,7 +108,7 @@ static int REDOXAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int i
 	SDL_memset(audio_data, 0, sizeof(SDL_PrivateAudioData));
 
 	this->hidden = audio_data;
-	this->hidden->output = open("audio:", O_WRONLY);
+	this->hidden->output = open("/scheme/audio", O_WRONLY);
 	if (this->hidden->output < 0)
 	{
 		fprintf(stderr, "Redox audio failed to open audio\n");
