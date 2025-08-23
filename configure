@@ -10590,7 +10590,9 @@ rdos*)
 
 redox*)
   version_type=linux
-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${shared_ext}$versuffix'
+  need_version=yes
+  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+  soname_spec='${libname}${release}${shared_ext}$major'
   finish_cmds='PATH="\$PATH:/usr/etc" ldconfig $libdir'
   shlibpath_var=LD_LIBRARY_PATH
   shlibpath_overrides_runpath=yes
@@ -15278,12 +15280,12 @@ rdos*)
 
 redox*)
   version_type=linux
-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${shared_ext}$versuffix'
+  need_version=yes
+  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+  soname_spec='${libname}${release}${shared_ext}$major'
   finish_cmds='PATH="\$PATH:/usr/etc" ldconfig $libdir'
   shlibpath_var=LD_LIBRARY_PATH
-  shlibpath_overrides_runpath=no
-  hardcode_into_libs=yes
-  need_version=yes
+  shlibpath_overrides_runpath=yes
   ;;
 
 solaris*)
