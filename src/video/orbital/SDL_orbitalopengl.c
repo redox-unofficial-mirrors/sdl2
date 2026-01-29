@@ -115,6 +115,17 @@ SDL_GLContext ORBITAL_GL_CreateContext(_THIS, SDL_Window* window) {
 }
 
 void ORBITAL_GL_DeleteContext(_THIS, SDL_GLContext context) {
+    SDL_VideoData* video_data = _this->driverdata;
+    assert(video_data != NULL);
+
+    if (video_data->mesa_context == context) {
+        OSMesaMakeCurrent(NULL, NULL, GL_UNSIGNED_BYTE, 0, 0);
+        video_data->mesa_context = NULL;
+    }
+    if (video_data->mesa_buffer != NULL) {
+        SDL_free(video_data->mesa_buffer);
+        video_data->mesa_buffer = NULL;
+    }
     OSMesaDestroyContext(context);
 }
 

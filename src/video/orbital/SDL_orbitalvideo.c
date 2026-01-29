@@ -64,16 +64,9 @@ static int ORBITAL_Available(void)
 static void ORBITAL_DeleteDevice(SDL_VideoDevice *device)
 {
 	SDL_VideoData* video_data = device->driverdata;
-    if (video_data->orb_window != NULL) {
-	    ORBITAL_DestroyWindow(device, video_data->orb_window);
-    }
-    if (video_data->mesa_context != NULL) {
-	    ORBITAL_GL_DeleteContext(device, video_data->mesa_context);
-        video_data->mesa_context = NULL;
-    }
-    if (video_data->mesa_buffer != NULL) {
-        SDL_free(video_data->mesa_buffer);
-        video_data->mesa_buffer = NULL;
+    if (video_data->window != NULL) {
+	    ORBITAL_DestroyWindow(device, video_data->window);
+        video_data->window = NULL;
     }
 
     SDL_free(device->driverdata);

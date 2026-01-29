@@ -170,6 +170,11 @@ void ORBITAL_DestroyWindow(_THIS, SDL_Window* window) {
         orb_window_destroy(video_data->orb_window);
         video_data->orb_window = NULL;
     }
+    if (video_data->mesa_context != NULL) {
+        ORBITAL_GL_DeleteContext(_this, video_data->mesa_context);
+        video_data->mesa_context = NULL;
+    }
+    video_data->window = NULL;
 }
 
 SDL_bool ORBITAL_GetWindowWMInfo(_THIS, SDL_Window* window, struct SDL_SysWMinfo *info) {
