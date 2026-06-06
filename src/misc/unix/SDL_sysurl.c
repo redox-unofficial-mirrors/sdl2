@@ -32,7 +32,10 @@ int SDL_SYS_OpenURL(const char *url)
 {
     const pid_t pid1 = fork();
     if (pid1 == 0) { /* child process */
-#ifdef USE_POSIX_SPAWN
+#if  defined(__redox__)
+        printf("posix_spawnp is not supported by Redox\n");
+        exit(1);
+#elif defined(USE_POSIX_SPAWN)
         pid_t pid2;
         const char *args[] = { "xdg-open", url, NULL };
         /* Clear LD_PRELOAD so Chrome opens correctly when this application is launched by Steam */

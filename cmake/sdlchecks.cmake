@@ -930,6 +930,22 @@ macro(CheckQNXScreen)
 endmacro()
 
 # Requires:
+# - liborbital
+macro(CheckOrbital)
+  if(SDL_ORBITAL)
+    check_c_source_compiles("
+        #include <orbital.h>
+        int main (int argc, char** argv) { return 0; }" HAVE_LIBORBITAL)
+    if(HAVE_LIBORBITAL)
+        set(HAVE_ORBITAL TRUE)
+        file(GLOB ORBITAL_VIDEO_SOURCES ${SDL2_SOURCE_DIR}/src/video/orbital/*.c)
+        list(APPEND SOURCE_FILES ${ORBITAL_VIDEO_SOURCES})
+      list(APPEND EXTRA_LIBS orbital OSMesa)
+    endif()
+  endif()
+endmacro()
+
+# Requires:
 # - nada
 # Optional:
 # - THREADS opt
