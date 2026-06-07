@@ -45,6 +45,9 @@ static const AudioBootStrap *const bootstrap[] = {
 #ifdef SDL_AUDIO_DRIVER_PULSEAUDIO
     &PULSEAUDIO_bootstrap,
 #endif
+#ifdef SDL_AUDIO_DRIVER_REDOXAUDIO
+    &REDOXAUDIO_bootstrap,
+#endif
 #ifdef SDL_AUDIO_DRIVER_ALSA
     &ALSA_bootstrap,
 #endif

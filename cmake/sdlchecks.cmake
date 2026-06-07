@@ -937,7 +937,7 @@ macro(CheckOrbital)
         #include <orbital.h>
         int main (int argc, char** argv) { return 0; }" HAVE_LIBORBITAL)
     if(HAVE_LIBORBITAL)
-        set(HAVE_ORBITAL TRUE)
+        set(SDL_VIDEO_DRIVER_ORBITAL 1)
         file(GLOB ORBITAL_VIDEO_SOURCES ${SDL2_SOURCE_DIR}/src/video/orbital/*.c)
         list(APPEND SOURCE_FILES ${ORBITAL_VIDEO_SOURCES})
       list(APPEND EXTRA_LIBS orbital OSMesa)

@@ -162,4 +162,4 @@ static int REDOXAUDIO_Init(SDL_AudioDriverImpl *impl)
 
 AudioBootStrap REDOXAUDIO_bootstrap = {
 	REDOXAUDIO_DRIVER_NAME, "Redox audio",
-	REDOXAUDIO_Init, 0};
+	REDOXAUDIO_Init, SDL_FALSE};

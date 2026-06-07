@@ -56,11 +56,6 @@ static void ORBITAL_VideoQuit(_THIS);
 
 /* ORBITAL driver bootstrap functions */
 
-static int ORBITAL_Available(void)
-{
-	return 1;
-}
-
 static void ORBITAL_DeleteDevice(SDL_VideoDevice *device)
 {
 	SDL_VideoData* video_data = device->driverdata;
@@ -165,7 +160,7 @@ static SDL_VideoDevice* ORBITAL_CreateDevice(int devindex)
 
 VideoBootStrap ORBITAL_bootstrap = {
 	ORBITALVID_DRIVER_NAME, "SDL orbital video driver",
-	ORBITAL_Available, ORBITAL_CreateDevice
+	ORBITAL_CreateDevice, NULL
 };
 
 
