@@ -43,9 +43,10 @@ static SDL_Keycode keymap[256];
 
 void ORBITAL_PumpEvents(_THIS)
 {
+    OrbEventOption oeo;
+    SDL_Joystick *joystick;
     SDL_Keysym keysym;
     void* event_iter;
-    OrbEventOption oeo;
     int resize_width = -1, resize_height = -1;
     SDL_Mouse *mouse = SDL_GetMouse();
     SDL_VideoData* video_data = _this->driverdata;
@@ -108,6 +109,58 @@ void ORBITAL_PumpEvents(_THIS)
                 break;
             case OrbEventOption_Screen:
                 // oeo.screen.width, oeo.screen.height
+                break;
+            case OrbEventOption_ControllerAxis:
+                //TODO: use controller ID
+                joystick = SDL_JoystickFromInstanceID(0);
+                if (joystick != NULL) {
+                    uint16_t orb_axis = oeo.controller_axis.axis;
+                    Uint8 sdl_axis = 0xff;
+                    if (orb_axis >= ORB_CONTROLLER_AXIS_X && orb_axis <= ORB_CONTROLLER_AXIS_RZ) {
+                        sdl_axis = (Uint8)(orb_axis - ORB_CONTROLLER_AXIS_X);
+                    }
+
+                    int32_t value = oeo.controller_axis.value;
+                    // Y and RY must be inverted?
+                    if ((orb_axis == ORB_CONTROLLER_AXIS_Y) || (orb_axis == ORB_CONTROLLER_AXIS_RY)) {
+                        value = -value;
+                    }
+                    // Z and RZ must be rescaled
+                    if ((orb_axis == ORB_CONTROLLER_AXIS_RZ) || (orb_axis == ORB_CONTROLLER_AXIS_Z)) {
+                        float value_f = (((float)value) - 128.0)/128.0;
+                        value = (Sint16)(value_f * 32768.0);
+                    }
+                    // Limit to SDL limits
+                    if (value < SDL_JOYSTICK_AXIS_MIN) {
+                        value = SDL_JOYSTICK_AXIS_MIN;
+                    } else if (value > SDL_JOYSTICK_AXIS_MAX) {
+                        value = SDL_JOYSTICK_AXIS_MAX;
+                    }
+
+                    //printf("controller %d=%p axis %d=>%d value %d=>%d\n", oeo.controller_axis.id, joystick, orb_axis, sdl_axis, oeo.controller_axis.value, value);
+                    SDL_LockJoysticks();
+                    SDL_PrivateJoystickAxis(joystick, sdl_axis, value);
+                    SDL_UnlockJoysticks();
+                }
+                break;
+            case OrbEventOption_ControllerButton:
+                //TODO: use controller ID
+                joystick = SDL_JoystickFromInstanceID(0);
+                if (joystick != NULL) {
+                    uint16_t orb_button = oeo.controller_button.button;
+                    Uint8 sdl_button = 0xFF;
+                    if (orb_button >= ORB_CONTROLLER_A && orb_button <= ORB_CONTROLLER_GUIDE) {
+                        sdl_button = (Uint8)(orb_button - ORB_CONTROLLER_A);
+                    }
+                    if (orb_button >= ORB_CONTROLLER_DPAD_UP && orb_button <= ORB_CONTROLLER_DPAD_LEFT) {
+                        sdl_button = (Uint8)(orb_button - ORB_CONTROLLER_DPAD_UP) + 11;
+                    }
+
+                    //printf("controller %d=%p button %d=>%d pressed %d\n", oeo.controller_button.id, joystick, orb_button, sdl_button, oeo.controller_button.pressed);
+                    SDL_LockJoysticks();
+                    SDL_PrivateJoystickButton(joystick, sdl_button, oeo.controller_button.pressed ? SDL_PRESSED : SDL_RELEASED);
+                    SDL_UnlockJoysticks();
+                }
                 break;
             case OrbEventOption_Unknown:
                 // oeo.unknown.code, oeo.unknown.a, oeo.unknown.b
