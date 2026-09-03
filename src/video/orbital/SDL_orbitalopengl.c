@@ -40,17 +40,9 @@ void* ORBITAL_GL_GetProcAddress(_THIS, const char *proc)
 
 int ORBITAL_GL_SwapWindow(_THIS, SDL_Window* window) {
     SDL_VideoData* video_data = _this->driverdata;
-    Uint32 width = orb_window_width(video_data->orb_window);
-    Uint32 height = orb_window_height(video_data->orb_window);
-    Uint32* frame_data = orb_window_data(video_data->orb_window);
-    Uint32* image_data = video_data->mesa_buffer;
 
     // It is currently required to flush for video data to be updated
     glFlush();
-
-    for(int i = 0; i < width * height; ++i) {
-        frame_data[i] = image_data[i] | 0xFF000000;
-    }
 
     orb_window_sync(video_data->orb_window);
     return 0;
@@ -59,31 +51,24 @@ int ORBITAL_GL_SwapWindow(_THIS, SDL_Window* window) {
 int ORBITAL_GL_MakeCurrent(_THIS, SDL_Window* window, SDL_GLContext ctx) {
     SDL_VideoData* video_data = _this->driverdata;
     OSMesaContext context = ctx;
-    void* buffer = NULL;
-    Uint32 width = 0;
-    Uint32 height = 0;
+
 
     if (ctx == NULL)
         return -1;
 
     assert(video_data != NULL);
 
-    width = orb_window_width(video_data->orb_window);
-    height = orb_window_height(video_data->orb_window);
-    buffer = SDL_malloc(width * height * 4);
-    if (buffer == NULL) {
-        fprintf(stderr, "Frame buffer allocation failed\n");
-        OSMesaDestroyContext(context);
-        SDL_OutOfMemory();
-        return -1;
+    if (video_data->mesa_context == context && video_data->mesa_buffer != NULL) {
+        return 0; // no-op
     }
 
-    //fprintf(stderr, "Frame buffer allocated\n");
+    Uint32 width = orb_window_width(video_data->orb_window);
+    Uint32 height = orb_window_height(video_data->orb_window);
+    void* buffer = orb_window_data(video_data->orb_window);
 
     if (!OSMesaMakeCurrent(context, buffer, GL_UNSIGNED_BYTE, width, height)) {
         fprintf(stderr, "OSMesaMakeCurrent failed\n");
         OSMesaDestroyContext(context);
-        SDL_free(buffer);
         return -1;
     }
 
@@ -122,10 +107,7 @@ void ORBITAL_GL_DeleteContext(_THIS, SDL_GLContext context) {
         OSMesaMakeCurrent(NULL, NULL, GL_UNSIGNED_BYTE, 0, 0);
         video_data->mesa_context = NULL;
     }
-    if (video_data->mesa_buffer != NULL) {
-        SDL_free(video_data->mesa_buffer);
-        video_data->mesa_buffer = NULL;
-    }
+    video_data->mesa_buffer = NULL;
     OSMesaDestroyContext(context);
 }
 
@@ -146,36 +128,19 @@ void ORBITAL_GL_UnloadLibrary(_THIS) {
 }
 
 void ORBITAL_GL_SetSize(_THIS, int width, int height) {
-    void * buffer;
     SDL_VideoData* video_data = _this->driverdata;
     assert(video_data != NULL);
 
-    // Resize OSMesa context, if it exists
     if (video_data->mesa_context == NULL) {
         return;
     }
 
-    fprintf(stderr, "ORBITAL_GL_SetSize: Resizing mesa context %p to %d, %d\n", video_data->mesa_context, width, height);
-
-    buffer = SDL_malloc(width * height * 4);
-    if (buffer == NULL) {
-        fprintf(stderr, "ORBITAL_GL_SetSize: Frame buffer allocation failed\n");
-        SDL_OutOfMemory();
-        return;
-    }
+    void* buffer = orb_window_data(video_data->orb_window);
 
     if (!OSMesaMakeCurrent(video_data->mesa_context, buffer, GL_UNSIGNED_BYTE, width, height)) {
         fprintf(stderr, "ORBITAL_GL_SetSize: OSMesaMakeCurrent failed\n");
-        SDL_free(buffer);
         return;
     }
 
-    if (video_data->mesa_buffer != NULL) {
-        fprintf(stderr, "ORBITAL_GL_SetSize: Freeing previous mesa buffer %p\n", video_data->mesa_buffer);
-        SDL_free(video_data->mesa_buffer);
-        video_data->mesa_buffer = NULL;
-    }
-
     video_data->mesa_buffer = buffer;
-    fprintf(stderr, "ORBITAL_GL_SetSize: Set new mesa buffer %p\n", video_data->mesa_buffer);
 }
