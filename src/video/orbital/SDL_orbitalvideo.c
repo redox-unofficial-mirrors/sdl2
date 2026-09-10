@@ -176,6 +176,8 @@ int ORBITAL_VideoInit(_THIS)
 	SDL_zero(desktop_mode);
 	desktop_mode.w = orb_display_width();
 	desktop_mode.h = orb_display_height();
+	desktop_mode.format = SDL_PIXELFORMAT_ARGB8888;
+	desktop_mode.refresh_rate = 60;
 
 	SDL_AddBasicVideoDisplay(&desktop_mode);
 
