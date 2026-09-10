@@ -21,6 +21,7 @@
 
     This file written by Ryan C. Gordon (icculus@icculus.org)
 */
+#include "../../SDL_internal.h"
 #include "SDL_redoxaudio.h"
 #include <SDL_audio.h>
 #include <fcntl.h>
@@ -35,12 +36,12 @@
 
 // Device driver functions
 static void REDOXAUDIO_DetectDevices(void);
-static int REDOXAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int iscapture);
+static int REDOXAUDIO_OpenDevice(_THIS, const char *devname);
 static void REDOXAUDIO_WaitDevice(_THIS);
 static void REDOXAUDIO_PlayDevice(_THIS);
 static Uint8 *REDOXAUDIO_GetDeviceBuf(_THIS);
 static void REDOXAUDIO_CloseDevice(_THIS);
-static int REDOXAUDIO_Init(SDL_AudioDriverImpl *impl);
+static SDL_bool REDOXAUDIO_Init(SDL_AudioDriverImpl *impl);
 
 static void
 REDOXAUDIO_DetectDevices(void)
@@ -93,7 +94,7 @@ static void REDOXAUDIO_CloseDevice(_THIS)
 	this->hidden = NULL;
 }
 
-static int REDOXAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int iscapture)
+static int REDOXAUDIO_OpenDevice(_THIS, const char *devname)
 {
 	SDL_PrivateAudioData *audio_data = NULL;
 
@@ -140,7 +141,7 @@ static int REDOXAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int i
 	return 0;
 }
 
-static int REDOXAUDIO_Init(SDL_AudioDriverImpl *impl)
+static SDL_bool REDOXAUDIO_Init(SDL_AudioDriverImpl *impl)
 {
 	//fprintf(stderr, "SDL redox audio init started\n");
 
@@ -157,7 +158,7 @@ static int REDOXAUDIO_Init(SDL_AudioDriverImpl *impl)
 
 	//fprintf(stderr, "SDL redox audio init finished\n");
 
-	return 1;
+	return SDL_TRUE;
 }
 
 AudioBootStrap REDOXAUDIO_bootstrap = {
