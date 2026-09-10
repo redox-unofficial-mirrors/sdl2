@@ -19,11 +19,14 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "../../SDL_internal.h"
 #include <SDL_config.h>
 
-#include <SDL.h>
 #include <SDL_keyboard.h>
 #include <SDL_mouse.h>
+#include <SDL_events.h>
+#include "../../joystick/SDL_joystick_c.h"
+#include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_events_c.h"
 
 #include <orbital.h>
@@ -66,7 +69,8 @@ void ORBITAL_PumpEvents(_THIS)
             case OrbEventOption_TextInput:
                 if (oeo.text_input.character) {
                     char text[4] = {0};
-                    mbstate_t state = { 0 };
+                    mbstate_t state;
+                    SDL_zero(state);
                     if (wcrtomb(text, oeo.text_input.character, &state) > 0) {
                         SDL_SendKeyboardText(text);
                     }
@@ -94,7 +98,7 @@ void ORBITAL_PumpEvents(_THIS)
                 SDL_SendMouseWheel(mouse->focus, mouse->mouseID, oeo.scroll.x, oeo.scroll.y, SDL_MOUSEWHEEL_NORMAL);
                 break;
             case OrbEventOption_Quit:
-                SDL_Quit();
+                SDL_SendQuit();
                 break;
             case OrbEventOption_Focus:
                 //SDL_PrivateAppActive(oeo.focus.focused, SDL_APPMOUSEFOCUS);
@@ -116,11 +120,11 @@ void ORBITAL_PumpEvents(_THIS)
                 if (joystick != NULL) {
                     uint16_t orb_axis = oeo.controller_axis.axis;
                     Uint8 sdl_axis = 0xff;
+                    int32_t value = oeo.controller_axis.value;
                     if (orb_axis >= ORB_CONTROLLER_AXIS_X && orb_axis <= ORB_CONTROLLER_AXIS_RZ) {
                         sdl_axis = (Uint8)(orb_axis - ORB_CONTROLLER_AXIS_X);
                     }
 
-                    int32_t value = oeo.controller_axis.value;
                     // Y and RY must be inverted?
                     if ((orb_axis == ORB_CONTROLLER_AXIS_Y) || (orb_axis == ORB_CONTROLLER_AXIS_RY)) {
                         value = -value;

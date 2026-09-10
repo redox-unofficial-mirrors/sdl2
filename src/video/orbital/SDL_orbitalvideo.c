@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "../../SDL_internal.h"
 #include "SDL_config.h"
 
 /* Orbital SDL video driver implementation
@@ -78,7 +79,7 @@ static int ORBITAL_SetRelativeMouseMode(SDL_bool enabled) {
 	return 0;
 }
 
-static SDL_VideoDevice* ORBITAL_CreateDevice(int devindex)
+static SDL_VideoDevice* ORBITAL_CreateDevice(void)
 {
 	SDL_VideoDevice* device = NULL;
     SDL_VideoData* video_data = NULL;
